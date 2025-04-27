@@ -76,7 +76,7 @@ class SouShuBaClient:
         self.proxies = proxies
 
     def login_form_hash(self):
-        rst = self.session.get(f'https://{self.hostname}/member.php?mod=logging&action=login').text
+        rst = self.session.get(f'https://{self.hostname}/member.php?mod=logging&action=login',verify = False).text
         loginhash = re.search(r'<div id="main_messaqge_(.+?)">', rst).group(1)
         formhash = re.search(r'<input type="hidden" name="formhash" value="(.+?)" />', rst).group(1)
         return loginhash, formhash
@@ -100,7 +100,7 @@ class SouShuBaClient:
             'answer': self.answer
         }
 
-        resp = self.session.post(login_url, proxies=self.proxies, data=payload, headers=headers)
+        resp = self.session.post(login_url, proxies=self.proxies, data=payload, headers=headers,verify = False)
         if resp.status_code == 200:
             logger.info(f'Welcome {self.username}!')
         else:
@@ -108,7 +108,7 @@ class SouShuBaClient:
 
     def credit(self):
         credit_url = f"https://{self.hostname}/home.php?mod=spacecp&ac=credit&showcredit=1&inajax=1&ajaxtarget=extcreditmenu_menu"
-        credit_rst = self.session.get(credit_url).text
+        credit_rst = self.session.get(credit_url,verify = False).text
 
         # 解析 XML，提取 CDATA
         root = ET.fromstring(str(credit_rst))
@@ -121,7 +121,7 @@ class SouShuBaClient:
         return hcredit_2
 
     def space_form_hash(self):
-        rst = self.session.get(f'https://{self.hostname}/home.php').text
+        rst = self.session.get(f'https://{self.hostname}/home.php',verify = False).text
         formhash = re.search(r'<input type="hidden" name="formhash" value="(.+?)" />', rst).group(1)
         return formhash
 
@@ -141,7 +141,7 @@ class SouShuBaClient:
                 "referer": "home.php",
                 "formhash": formhash
             }
-            resp = self.session.post(space_url, proxies=self.proxies, data=payload, headers=headers)
+            resp = self.session.post(space_url, proxies=self.proxies, data=payload, headers=headers,verify = False)
             if re.search("操作成功", resp.text):
                 logger.info(f'{self.username} post {x + 1}nd successfully!')
                 time.sleep(120)
@@ -159,7 +159,9 @@ if __name__ == '__main__':
         client = SouShuBaClient(urlparse(url).hostname,
                                 os.environ.get('SOUSHUBA_USERNAME', "libesse"),
                                 os.environ.get('SOUSHUBA_PASSWORD', "yF9pnSBLH3wpnLd"))
+        logger.info('begin login')
         client.login()
+        logger.info('begin space')
         client.space()
         credit = client.credit()
         logger.info(f'{client.username} have {credit} coins!')
