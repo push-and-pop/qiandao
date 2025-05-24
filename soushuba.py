@@ -25,7 +25,7 @@ logger.addHandler(ch)
 
 def get_refresh_url(url: str):
     try:
-        response = requests.get(url)
+        response = requests.get(url,verify = False)
         if response.status_code != 403:
             response.raise_for_status()
 
@@ -46,7 +46,7 @@ def get_refresh_url(url: str):
         return None
 
 def get_url(url: str):
-    resp = requests.get(url)
+    resp = requests.get(url,verify = False)
     soup = BeautifulSoup(resp.content, 'html.parser')
     
     links = soup.find_all('a', href=True)
