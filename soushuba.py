@@ -121,7 +121,7 @@ class SouShuBaClient:
         return hcredit_2
 
     def space_form_hash(self):
-        rst = self.session.get(f'https://{self.hostname}/home.php',verify = False).text
+        rst = self.session.get(f'https://{self.hostname}',verify = False).text
         formhash = re.search(r'<input type="hidden" name="formhash" value="(.+?)" />', rst).group(1)
         return formhash
 
